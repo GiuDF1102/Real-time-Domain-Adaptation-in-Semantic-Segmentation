@@ -201,55 +201,53 @@ def parse_args():
 
 
 def main():
-  args = parse_args()
+    args = parse_args()
 
-  ## dataset
-  n_classes = args.num_classes
+    ## dataset
+    n_classes = args.num_classes
 
-  mode = args.mode
+    mode = args.mode
 
-  if mode == 'CS-CS':
-    train_dataset = CityScapes(mode='train')
-    val_dataset = CityScapes(mode='val')
-  elif mode == 'GTA5-GTA5':
-    train_dataset = GTA5(mode='train')
-    val_dataset = GTA5(mode='val')
-  elif mode == 'GTA5-CS':
-    # Load GTA5 trained model
-    val_dataset = CityScapes(mode='val')
-  else: 
-      print("Mode not found")
+    if mode == 'CS-CS':
+        train_dataset = CityScapes(mode='train')
+        val_dataset = CityScapes(mode='val')
+    elif mode == 'GTA5-GTA5':
+        train_dataset = GTA5(mode='train')
+        val_dataset = GTA5(mode='val')
+    elif mode == 'GTA5-CS':
+        # There should be no need to retrain GTA5 when training has already been done with mode GTA5-GTA5 as 
+        # the model should be the same, however...
+        train_dataset = GTA5(mode='train')
+        val_dataset = CityScapes(mode='val')
+    else: 
+        print("Mode not found")
 
-  if mode != 'GTA5-CS':
-      dataloader_train = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers, pin_memory=False, drop_last=True)
-  
-  dataloader_val = DataLoader(val_dataset, batch_size=1, shuffle=False, num_workers=args.num_workers, drop_last=False)
 
-  if mode != 'GTA5-CS':
-      model = BiSeNet(backbone=args.backbone, n_classes=n_classes, pretrain_model=args.pretrain_path, use_conv_last=args.use_conv_last)
-  else:
-      model = BiSeNet(backbone=args.backbone, n_classes=n_classes, pretrain_model='', use_conv_last=args.use_conv_last)
+    dataloader_train = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers, pin_memory=False, drop_last=True)
+    dataloader_val = DataLoader(val_dataset, batch_size=1, shuffle=False, num_workers=args.num_workers, drop_last=False)
 
-  if torch.cuda.is_available() and args.use_gpu:
-      model = torch.nn.DataParallel(model).cuda()
+    model = BiSeNet(backbone=args.backbone, n_classes=n_classes, pretrain_model=args.pretrain_path, use_conv_last=args.use_conv_last)
 
-  ## optimizer
-  # build optimizer
-  if args.optimizer == 'rmsprop':
-      optimizer = torch.optim.RMSprop(model.parameters(), args.learning_rate)
-  elif args.optimizer == 'sgd':
-      optimizer = torch.optim.SGD(model.parameters(), args.learning_rate, momentum=0.9, weight_decay=1e-4)
-  elif args.optimizer == 'adam':
-      optimizer = torch.optim.Adam(model.parameters(), args.learning_rate)
-  else:  # rmsprop
-      print('not supported optimizer \n')
-      return None
+    if torch.cuda.is_available() and args.use_gpu:
+        model = torch.nn.DataParallel(model).cuda()
 
-  if mode != 'GTA5-CS':
-      train(args, model, optimizer, dataloader_train, dataloader_val)
-  
-  # final test
-  val(args, model, dataloader_val)
+    ## optimizer
+    # build optimizer
+    if args.optimizer == 'rmsprop':
+        optimizer = torch.optim.RMSprop(model.parameters(), args.learning_rate)
+    elif args.optimizer == 'sgd':
+        optimizer = torch.optim.SGD(model.parameters(), args.learning_rate, momentum=0.9, weight_decay=1e-4)
+    elif args.optimizer == 'adam':
+        optimizer = torch.optim.Adam(model.parameters(), args.learning_rate)
+    else:  # rmsprop
+        print('not supported optimizer \n')
+        return None
+
+    #train
+    train(args, model, optimizer, dataloader_train, dataloader_val)
+
+    # final test
+    val(args, model, dataloader_val)
 
 if __name__ == "__main__":
     main()
