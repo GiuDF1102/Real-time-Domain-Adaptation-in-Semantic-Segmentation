@@ -24,7 +24,7 @@ class GTA5(Dataset):
         elif self.mode == 'val':
             self.data = open(self.data_path + 'val_gta5.txt', 'r').read().splitlines()
             self.labels = open(self.data_path + 'val_gta5.txt', 'r').read().splitlines()
-        elif self.mode == 'train_full_gta':
+        elif self.mode == 'train_full':
             self.data = open(self.data_path + 'full_gta5.txt', 'r').read().splitlines()
             self.labels = open(self.data_path + 'full_gta5.txt', 'r').read().splitlines()
 

@@ -122,13 +122,16 @@ def str2bool(v):
 
 def parse_args():
     parse = argparse.ArgumentParser()
-
     parse.add_argument('--mode',
                        dest='mode',
                        type=str,
                        default='train',
     )
-
+    parse.add_argument('--augmentation',
+                       dest='mode',
+                       type=str,
+                       default=None,
+    )
     parse.add_argument('--backbone',
                        dest='backbone',
                        type=str,
@@ -217,7 +220,7 @@ def main():
     elif mode == 'GTA5-CS':
         # There should be no need to retrain GTA5 when training has already been done with mode GTA5-GTA5 as 
         # the model should be the same, however...
-        train_dataset = GTA5(mode='train')
+        train_dataset = GTA5(mode='train', aug_type=args.augmentation)
         val_dataset = CityScapes(mode='val')
     else: 
         print("Mode not found")
