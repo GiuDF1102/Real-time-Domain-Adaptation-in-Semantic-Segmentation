@@ -128,7 +128,7 @@ def parse_args():
                        default='train',
     )
     parse.add_argument('--augmentation',
-                       dest='mode',
+                       dest='augmentation',
                        type=str,
                        default=None,
     )
