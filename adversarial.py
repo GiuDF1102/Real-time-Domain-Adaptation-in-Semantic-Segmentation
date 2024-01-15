@@ -19,6 +19,15 @@ import torch.nn.functional as F
 
 logger = logging.getLogger()
 
+def lr_poly(base_lr, iter, max_iter, power):
+    return base_lr * ((1 - float(iter) / max_iter) ** (power))
+
+def adjust_learning_rate_D(optimizer, i_iter, lrate, num_steps, power):
+    lr = lr_poly(lrate, i_iter, num_steps, power)
+    optimizer.param_groups[0]['lr'] = lr
+    if len(optimizer.param_groups) > 1:
+        optimizer.param_groups[1]['lr'] = lr * 10
+
 def val(args, model, dataloader):
     print('start val!')
     with torch.no_grad():
@@ -126,15 +135,30 @@ def train_adversarial(args, model, model_D1, model_D2, model_D3, optimizer, opti
 
     max_miou = 0
     step = 0
-    for epoch in range(args.num_epochs):    
+    for epoch in range(args.num_epochs):
+        loss_seg_value1 = 0
+        loss_adv_target_value1 = 0
+        loss_D_value1 = 0
+
+        loss_seg_value2 = 0
+        loss_adv_target_value2 = 0
+        loss_D_value2 = 0
+
+        loss_seg_value3 = 0
+        loss_adv_target_value3 = 0
+        loss_D_value3 = 0
+
         lr = poly_lr_scheduler(optimizer, args.learning_rate, iter=epoch, max_iter=args.num_epochs)
+        adjust_learning_rate_D(optimizer_D1, epoch, args.learning_rate_D, args.num_epochs, power=0.9)
+        adjust_learning_rate_D(optimizer_D2, epoch, args.learning_rate_D, args.num_epochs, power=0.9)
+        adjust_learning_rate_D(optimizer_D3, epoch, args.learning_rate_D, args.num_epochs, power=0.9)
 
         model.train()
         model_D1.train()
         model_D2.train()
         model_D3.train()
 
-        tq = tqdm(total=len(dataloader_train) * args.batch_size)
+        tq = tqdm(total=(len(dataloader_target) + len (dataloader_train)) * args.batch_size)
         tq.set_description('epoch %d, lr %f' % (epoch, lr))
         loss_record = []
 
@@ -170,6 +194,9 @@ def train_adversarial(args, model, model_D1, model_D2, model_D3, optimizer, opti
                     loss = loss1 + loss2 + loss3
 
                 scaler.scale(loss).backward()
+                loss_seg_value1 += loss1.data.cpu().numpy() / args.iter_size
+                loss_seg_value2 += loss2.data.cpu().numpy() / args.iter_size
+                loss_seg_value3 += loss3.data.cpu().numpy() / args.iter_size
 
                 with amp.autocast():
                     D_out1 = model_D1(F.softmax(pred_target1, dim=1))
@@ -193,6 +220,9 @@ def train_adversarial(args, model, model_D1, model_D2, model_D3, optimizer, opti
                     loss_D_target = loss_D_target / args.iter_size
                 
                 scaler.scale(loss_D_target).backward()
+                loss_adv_target_value1 += loss_adv_target1.data.cpu().numpy() / args.iter_size
+                loss_adv_target_value2 += loss_adv_target2.data.cpu().numpy() / args.iter_size
+                loss_adv_target_value3 += loss_adv_target3.data.cpu().numpy() / args.iter_size
 
                 # train D
                 # bring back requires_grad
@@ -234,6 +264,10 @@ def train_adversarial(args, model, model_D1, model_D2, model_D3, optimizer, opti
                 scaler.scale(loss_D2_source).backward()
                 scaler.scale(loss_D3_source).backward()
 
+                loss_D_value1 += loss_D1_source.data.cpu().numpy()
+                loss_D_value2 += loss_D2_source.data.cpu().numpy()
+                loss_D_value3 += loss_D3_source.data.cpu().numpy()
+
                 # train with target
                 pred_target1 = pred_target1.detach()
                 pred_target2 = pred_target2.detach()
@@ -271,7 +305,7 @@ def train_adversarial(args, model, model_D1, model_D2, model_D3, optimizer, opti
                 scaler.step(optimizer_D3)
                 scaler.update()
 
-                tq.update(args.batch_size)
+                tq.update(args.batch_size*2)
                 tq.set_postfix(loss='%.6f' % loss)
                 step += 1
                 # writer.add_scalar('loss_step', loss, step)
@@ -280,6 +314,9 @@ def train_adversarial(args, model, model_D1, model_D2, model_D3, optimizer, opti
         loss_train_mean = np.mean(loss_record)
         # writer.add_scalar('epoch/loss_epoch_train', float(loss_train_mean), epoch)
         print('loss for train : %f' % (loss_train_mean))
+        print('iter = {0:8d}/{1:8d}, loss_seg1 = {2:.3f} loss_seg2 = {3:.3f} loss_adv1 = {4:.3f}, loss_adv2 = {5:.3f} loss_D1 = {6:.3f} loss_D2 = {7:.3f}'.format(
+            epoch, args.num_steps, loss_seg_value1, loss_seg_value2, loss_adv_target_value1, loss_adv_target_value2, loss_D_value1, loss_D_value2))
+
         if epoch % args.checkpoint_step == 0 and epoch != 0:
             import os
             if not os.path.isdir(args.save_model_path):
