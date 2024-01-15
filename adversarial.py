@@ -341,7 +341,7 @@ def train_adversarial(args, model, model_D1, model_D2, model_D3, optimizer, opti
                 torch.save(model_D3.module.state_dict(), os.path.join(args.save_model_path, 'best_D3.pth'))
             # writer.add_scalar('epoch/precision_val', precision, epoch)
             # writer.add_scalar('epoch/miou val', miou, epoch)
-        plt.plot(range(args.num_epochs), miou_list)
+    plt.plot(range(args.num_epochs), miou_list)
     plt.xlabel("Epoch #")
     plt.ylabel("mIoU")
     plt.savefig(os.path.join("/content/drive/MyDrive/AML_Project/figures",args.figure_name))
