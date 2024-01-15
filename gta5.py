@@ -55,9 +55,27 @@ class GTA5(Dataset):
             "BL" : v2.Compose([blur_t]),
             "SOL" : v2.Compose([sol_t]),
         }
+
+        lab_transformation = {
+            "CS-HF": v2.Compose([hflip_t]),
+            "H-RP": v2.Compose([rp_t]),
+            "B-GS": v2.Compose([]),
+            "HS-HF": v2.Compose([hflip_t]),
+            "S-BL-HF": v2.Compose([hflip_t]),
+            "B" : v2.Compose([]),
+            "C" : v2.Compose([]),
+            "S" : v2.Compose([]),
+            "H" : v2.Compose([]),
+            "GS" : v2.Compose([]),
+            "HF" : v2.Compose([hflip_t]),
+            "RP" : v2.Compose([rp_t]),
+            "BL" : v2.Compose([]),
+            "SOL" : v2.Compose([]),
+        }
         
         if self.aug_type is not None:
             self.aug_transform = aug_transformations[self.aug_type]
+            self.lab_transform = lab_transformation[self.aug_type]
 
         # Normalization
         self.transform = v2.Compose([
@@ -65,7 +83,6 @@ class GTA5(Dataset):
             v2.ToDtype(float32, scale=True), 
             v2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
         ])
-
 
 
     def __len__(self):
@@ -91,6 +108,7 @@ class GTA5(Dataset):
         if self.aug_transform is not None and self.mode == 'train_full' and random.random() > 0.5:
             image = self.aug_transform(image)
             image = self.transform(image)
+            label = self.lab_transform(label)
         else:
             image = self.transform(image)
 
