@@ -62,15 +62,8 @@ class GTA5(Dataset):
             "B-GS": v2.Compose([]),
             "HS-HF": v2.Compose([hflip_t]),
             "S-BL-HF": v2.Compose([hflip_t]),
-            "B" : v2.Compose([]),
-            "C" : v2.Compose([]),
-            "S" : v2.Compose([]),
-            "H" : v2.Compose([]),
-            "GS" : v2.Compose([]),
             "HF" : v2.Compose([hflip_t]),
             "RP" : v2.Compose([rp_t]),
-            "BL" : v2.Compose([]),
-            "SOL" : v2.Compose([]),
         }
         
         if self.aug_type is not None:
