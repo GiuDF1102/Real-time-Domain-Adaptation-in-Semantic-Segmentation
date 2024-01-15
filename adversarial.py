@@ -13,6 +13,7 @@ import torch.cuda.amp as amp
 from utils import poly_lr_scheduler
 from utils import reverse_one_hot, compute_global_accuracy, fast_hist, per_class_iu
 from tqdm import tqdm
+import matplotlib.pyplot as plt
 
 from model.discriminator import FCDiscriminator
 import torch.nn.functional as F
@@ -134,6 +135,7 @@ def train_adversarial(args, model, model_D1, model_D2, model_D3, optimizer, opti
     target_label = 1
 
     max_miou = 0
+    miou_list = []
     step = 0
     for epoch in range(args.num_epochs):
         loss_seg_value1 = 0
@@ -328,6 +330,7 @@ def train_adversarial(args, model, model_D1, model_D2, model_D3, optimizer, opti
 
         if epoch % args.validation_step == 0 and epoch != 0:
             precision, miou = val(args, model, dataloader_val)
+            miou_list.append(miou)
             if miou > max_miou:
                 max_miou = miou
                 import os
@@ -338,6 +341,10 @@ def train_adversarial(args, model, model_D1, model_D2, model_D3, optimizer, opti
                 torch.save(model_D3.module.state_dict(), os.path.join(args.save_model_path, 'best_D3.pth'))
             # writer.add_scalar('epoch/precision_val', precision, epoch)
             # writer.add_scalar('epoch/miou val', miou, epoch)
+        plt.plot(range(args.num_epochs), miou_list)
+    plt.xlabel("Epoch #")
+    plt.ylabel("mIoU")
+    plt.savefig(os.path.join("/content/drive/MyDrive/AML_Project/figures",args.figure_name))
 
 def str2bool(v):
     if v.lower() in ('yes', 'true', 't', 'y', '1'):
