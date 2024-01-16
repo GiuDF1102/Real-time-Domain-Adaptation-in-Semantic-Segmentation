@@ -4,14 +4,14 @@ import torch
 
 class FCDiscriminator(nn.Module):
 
-	def __init__(self, num_classes, ndf = 64, pretrain_model=''):
+	def __init__(self, num_classes, ndf = 64, kpl=1, pretrain_model=''):
 		super(FCDiscriminator, self).__init__()
 
-		self.conv1 = depthwise_separable_conv(num_classes, ndf)
-		self.conv2 = depthwise_separable_conv(ndf, ndf*2)
-		self.conv3 = depthwise_separable_conv(ndf*2, ndf*4)
-		self.conv4 = depthwise_separable_conv(ndf*4, ndf*8)
-		self.classifier = depthwise_separable_conv(ndf*8, 1)
+		self.conv1 = depthwise_separable_conv(num_classes, ndf, kpl)
+		self.conv2 = depthwise_separable_conv(ndf, ndf*2, kpl)
+		self.conv3 = depthwise_separable_conv(ndf*2, ndf*4, kpl)
+		self.conv4 = depthwise_separable_conv(ndf*4, ndf*8, kpl)
+		self.classifier = depthwise_separable_conv(ndf*8, 1, kpl)
 
 		self.leaky_relu = nn.LeakyReLU(negative_slope=0.2, inplace=True)
 		#self.up_sample = nn.Upsample(scale_factor=32, mode='bilinear')
@@ -45,10 +45,10 @@ class FCDiscriminator(nn.Module):
 		self.load_state_dict(self_state_dict)
 		
 class depthwise_separable_conv(nn.Module):
-    def __init__(self, nin, nout):
+    def __init__(self, nin, nout, kernels_per_layer):
         super(depthwise_separable_conv, self).__init__()
-        self.depthwise = nn.Conv2d(nin, nin, groups=nin, kernel_size=4, stride=2, padding=1)
-        self.pointwise = nn.Conv2d(nin, nout, kernel_size=1)
+        self.depthwise = nn.Conv2d(nin, nin*kernels_per_layer, groups=nin, kernel_size=4, stride=2, padding=1)
+        self.pointwise = nn.Conv2d(nin*kernels_per_layer, nout, kernel_size=1)
 
     def forward(self, x):
         out = self.depthwise(x)
