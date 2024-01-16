@@ -59,7 +59,6 @@ class GTA5(Dataset):
         lab_transformation = {
             "CS-HF": v2.Compose([hflip_t]),
             "H-RP": v2.Compose([rp_t]),
-            "B-GS": v2.Compose([]),
             "HS-HF": v2.Compose([hflip_t]),
             "S-BL-HF": v2.Compose([hflip_t]),
             "HF" : v2.Compose([hflip_t]),
