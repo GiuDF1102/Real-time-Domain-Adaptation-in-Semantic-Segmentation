@@ -163,7 +163,7 @@ def parse_args():
                        help='Start counting epochs from this number')
     parse.add_argument('--checkpoint_step',
                        type=int,
-                       default=10,
+                       default=1,
                        help='How often to save checkpoints (epochs)')
     parse.add_argument('--validation_step',
                        type=int,
@@ -236,7 +236,11 @@ def main():
     dataloader_train = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers, pin_memory=False, drop_last=True)
     dataloader_val = DataLoader(val_dataset, batch_size=1, shuffle=False, num_workers=args.num_workers, drop_last=False)
 
-    model = BiSeNet(backbone=args.backbone, n_classes=n_classes, pretrain_model=args.pretrain_path, use_conv_last=args.use_conv_last)
+    if args.pretrain_path != './checkpoints/STDCNet813M_73.91.tar':
+        model = BiSeNet(backbone=args.backbone, n_classes=n_classes, use_conv_last=args.use_conv_last)
+        model.load_state_dict(torch.load(args.pretrain_path), strict=False)
+    else:
+        model = BiSeNet(backbone=args.backbone, n_classes=n_classes, pretrain_model=args.pretrain_path, use_conv_last=args.use_conv_last)
 
     if torch.cuda.is_available() and args.use_gpu:
         model = torch.nn.DataParallel(model).cuda()
