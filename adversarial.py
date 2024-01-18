@@ -391,22 +391,22 @@ def parse_args():
     parse.add_argument('--pretrain_path',
                       dest='pretrain_path',
                       type=str,
-                      default='',
+                      default='./STDCNet813M_73.91.tar',
     )
     parse.add_argument('--pretrain_path_D1',
                       dest='pretrain_path_D1',
                       type=str,
-                      default='',
+                      default=None,
     )
     parse.add_argument('--pretrain_path_D2',
                       dest='pretrain_path_D2',
                       type=str,
-                      default='',
+                      default=None,
     )
     parse.add_argument('--pretrain_path_D3',
                       dest='pretrain_path_D3',
                       type=str,
-                      default='',
+                      default=None,
     )
     parse.add_argument('--use_conv_last',
                        dest='use_conv_last',
@@ -489,7 +489,7 @@ def main():
     dataloader_target = DataLoader(target_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers, drop_last=False)
     dataloader_val = DataLoader(val_dataset, batch_size=1, shuffle=False, num_workers=args.num_workers, drop_last=False)
 
-    if args.pretrain_path != './checkpoints/STDCNet813M_73.91.tar':
+    if args.pretrain_path != './checkpoints/STDCNet813M_73.91.tar' and args.pretrain_path_D2 is not None and args.pretrain_path_D1 is not None and args.pretrain_path_D3 is not None:
         model = BiSeNet(backbone=args.backbone, n_classes=n_classes, use_conv_last=args.use_conv_last)
         model.load_state_dict(torch.load(args.pretrain_path), strict=False)
         model_D1 = FCDiscriminator(num_classes=n_classes, pretrain_model=args.pretrain_path_D1)
