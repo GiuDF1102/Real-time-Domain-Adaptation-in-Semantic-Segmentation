@@ -58,7 +58,6 @@ class GTA5(Dataset):
 
         lab_transformation = {
             "CS-HF": v2.Compose([hflip_t]),
-            "H-RP": v2.Compose([rp_t]),
             "HS-HF": v2.Compose([hflip_t]),
             "S-BL-HF": v2.Compose([hflip_t]),
             "HF" : v2.Compose([hflip_t]),
@@ -67,7 +66,8 @@ class GTA5(Dataset):
         
         if self.aug_type is not None:
             self.aug_transform = aug_transformations[self.aug_type]
-            self.lab_transform = lab_transformation[self.aug_type]
+            if self.aug_type != 'H' and self.aug_type != 'H-RP':
+                self.lab_transform = lab_transformation[self.aug_type]
 
         # Normalization
         self.transform = v2.Compose([
@@ -100,7 +100,8 @@ class GTA5(Dataset):
         if self.aug_transform is not None and self.mode == 'train_full' and random.random() > 0.5:
             image = self.aug_transform(image)
             image = self.transform(image)
-            label = self.lab_transform(label)
+            if self.aug_type != 'H' and self.aug_type != 'H-RP':
+                label = self.lab_transform(label)
         else:
             image = self.transform(image)
 
