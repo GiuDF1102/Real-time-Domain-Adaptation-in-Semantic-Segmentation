@@ -225,8 +225,6 @@ def main():
         train_dataset = GTA5(mode='train')
         val_dataset = GTA5(mode='val')
     elif mode == 'GTA5-CS':
-        # There should be no need to retrain GTA5 when training has already been done with mode GTA5-GTA5 as 
-        # the model should be the same, however...
         train_dataset = GTA5(mode='train_full', aug_type=args.augmentation)
         val_dataset = CityScapes(mode='val')
     else: 
