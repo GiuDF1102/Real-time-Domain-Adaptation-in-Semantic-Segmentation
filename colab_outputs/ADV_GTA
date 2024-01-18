@@ -1,0 +1,159 @@
+use pretrain model ./STDCNet813M_73.91.tar
+epoch 0, lr 0.010000:  77% 3144/4072 [05:43<01:41,  9.16it/s, loss=1.206487]
+loss for train : 1.859608
+iter =        0/      50, loss_seg1 = 231.024, loss_seg2 = 240.603, loss_seg3 = 259.199, loss_adv1 = 481.559, loss_adv2 = 471.947, loss_adv3 = 477.038, loss_ loss_D1 = 112.461, loss_D2 = 114.176, loss_D3 = 115.234
+epoch 1, lr 0.009820:  77% 3144/4072 [04:59<01:28, 10.51it/s, loss=0.967905]
+loss for train : 1.085581
+iter =        1/      50, loss_seg1 = 133.638, loss_seg2 = 140.094, loss_seg3 = 152.902, loss_adv1 = 573.314, loss_adv2 = 586.436, loss_adv3 = 595.221, loss_ loss_D1 = 104.258, loss_D2 = 102.883, loss_D3 = 104.555
+epoch 2, lr 0.009639:  77% 3144/4072 [04:00<01:11, 13.07it/s, loss=0.753027]
+loss for train : 0.895348
+iter =        2/      50, loss_seg1 = 109.983, loss_seg2 = 115.096, loss_seg3 = 126.792, loss_adv1 = 638.579, loss_adv2 = 648.915, loss_adv3 = 660.514, loss_ loss_D1 = 99.837, loss_D2 = 98.156, loss_D3 = 99.727
+epoch 3, lr 0.009458:  77% 3144/4072 [03:59<01:10, 13.13it/s, loss=0.624680]
+loss for train : 0.827290
+iter =        3/      50, loss_seg1 = 100.976, loss_seg2 = 106.093, loss_seg3 = 118.056, loss_adv1 = 707.647, loss_adv2 = 722.309, loss_adv3 = 713.356, loss_ loss_D1 = 94.548, loss_D2 = 92.966, loss_D3 = 94.822
+epoch 4, lr 0.009277:  77% 3144/4072 [03:59<01:10, 13.13it/s, loss=0.753350]
+loss for train : 0.730484
+iter =        4/      50, loss_seg1 = 88.637, loss_seg2 = 93.170, loss_seg3 = 105.273, loss_adv1 = 757.394, loss_adv2 = 756.691, loss_adv3 = 739.793, loss_ loss_D1 = 91.483, loss_D2 = 91.267, loss_D3 = 91.786
+epoch 5, lr 0.009095:  77% 3144/4072 [03:59<01:10, 13.12it/s, loss=0.595776]
+loss for train : 0.661833
+iter =        5/      50, loss_seg1 = 79.728, loss_seg2 = 84.318, loss_seg3 = 96.054, loss_adv1 = 953.192, loss_adv2 = 830.981, loss_adv3 = 812.697, loss_ loss_D1 = 79.769, loss_D2 = 86.904, loss_D3 = 82.957
+epoch 6, lr 0.008913:  77% 3144/4072 [04:00<01:10, 13.09it/s, loss=0.519661]
+loss for train : 0.647268
+iter =        6/      50, loss_seg1 = 77.672, loss_seg2 = 82.312, loss_seg3 = 94.392, loss_adv1 = 1221.201, loss_adv2 = 875.449, loss_adv3 = 853.881, loss_ loss_D1 = 70.095, loss_D2 = 84.841, loss_D3 = 77.720
+epoch 7, lr 0.008731:  77% 3144/4072 [03:59<01:10, 13.11it/s, loss=0.456722]
+loss for train : 0.610938
+iter =        7/      50, loss_seg1 = 73.180, loss_seg2 = 77.522, loss_seg3 = 89.396, loss_adv1 = 1514.601, loss_adv2 = 864.907, loss_adv3 = 847.976, loss_ loss_D1 = 62.227, loss_D2 = 83.813, loss_D3 = 76.140
+epoch 8, lr 0.008548:  77% 3144/4072 [04:01<01:11, 13.04it/s, loss=0.465793]
+loss for train : 0.544509
+iter =        8/      50, loss_seg1 = 64.839, loss_seg2 = 68.889, loss_seg3 = 80.264, loss_adv1 = 1819.120, loss_adv2 = 956.728, loss_adv3 = 925.702, loss_ loss_D1 = 55.627, loss_D2 = 77.542, loss_D3 = 72.157
+epoch 9, lr 0.008364:  77% 3144/4072 [04:01<01:11, 13.02it/s, loss=0.456446]
+loss for train : 0.510555
+iter =        9/      50, loss_seg1 = 60.415, loss_seg2 = 64.512, loss_seg3 = 75.721, loss_adv1 = 1968.698, loss_adv2 = 1060.409, loss_adv3 = 955.822, loss_ loss_D1 = 53.268, loss_D2 = 71.386, loss_D3 = 71.352
+epoch 10, lr 0.008181:  77% 3144/4072 [04:00<01:10, 13.08it/s, loss=0.680704]
+loss for train : 0.497592
+iter =       10/      50, loss_seg1 = 58.939, loss_seg2 = 62.959, loss_seg3 = 73.657, loss_adv1 = 2086.971, loss_adv2 = 1196.435, loss_adv3 = 1021.360, loss_ loss_D1 = 50.877, loss_D2 = 66.076, loss_D3 = 69.653
+epoch 11, lr 0.007996:  77% 3144/4072 [04:00<01:11, 13.05it/s, loss=0.387865]
+loss for train : 0.455044
+iter =       11/      50, loss_seg1 = 53.590, loss_seg2 = 57.380, loss_seg3 = 67.863, loss_adv1 = 2143.428, loss_adv2 = 1329.884, loss_adv3 = 1116.426, loss_ loss_D1 = 49.766, loss_D2 = 62.712, loss_D3 = 67.852
+epoch 12, lr 0.007811:  77% 3144/4072 [04:01<01:11, 13.05it/s, loss=0.379715]
+loss for train : 0.478039
+iter =       12/      50, loss_seg1 = 56.323, loss_seg2 = 60.393, loss_seg3 = 71.153, loss_adv1 = 2324.466, loss_adv2 = 1436.826, loss_adv3 = 1154.445, loss_ loss_D1 = 46.539, loss_D2 = 60.745, loss_D3 = 68.475
+epoch 13, lr 0.007626:  77% 3144/4072 [04:00<01:10, 13.08it/s, loss=0.457664]
+loss for train : 0.443178
+iter =       13/      50, loss_seg1 = 52.201, loss_seg2 = 55.923, loss_seg3 = 66.044, loss_adv1 = 2318.526, loss_adv2 = 1551.116, loss_adv3 = 1192.704, loss_ loss_D1 = 47.454, loss_D2 = 59.929, loss_D3 = 68.639
+epoch 14, lr 0.007440:  77% 3144/4072 [04:01<01:11, 13.04it/s, loss=0.367242]
+loss for train : 0.415626
+iter =       14/      50, loss_seg1 = 48.697, loss_seg2 = 52.207, loss_seg3 = 62.437, loss_adv1 = 2303.473, loss_adv2 = 1674.621, loss_adv3 = 1264.928, loss_ loss_D1 = 48.334, loss_D2 = 58.447, loss_D3 = 67.312
+epoch 15, lr 0.007254:  77% 3144/4072 [04:00<01:10, 13.09it/s, loss=0.305867]
+loss for train : 0.393734
+iter =       15/      50, loss_seg1 = 45.892, loss_seg2 = 49.363, loss_seg3 = 59.482, loss_adv1 = 2333.537, loss_adv2 = 1741.019, loss_adv3 = 1285.132, loss_ loss_D1 = 47.828, loss_D2 = 57.945, loss_D3 = 67.146
+epoch 16, lr 0.007067:  77% 3144/4072 [04:01<01:11, 13.03it/s, loss=0.409526]
+loss for train : 0.380025
+iter =       16/      50, loss_seg1 = 44.295, loss_seg2 = 47.648, loss_seg3 = 57.408, loss_adv1 = 2292.076, loss_adv2 = 1830.757, loss_adv3 = 1343.411, loss_ loss_D1 = 49.471, loss_D2 = 57.317, loss_D3 = 66.332
+epoch 17, lr 0.006880:  77% 3144/4072 [04:01<01:11, 13.03it/s, loss=0.296471]
+loss for train : 0.377741
+iter =       17/      50, loss_seg1 = 43.997, loss_seg2 = 47.364, loss_seg3 = 57.091, loss_adv1 = 2281.661, loss_adv2 = 1849.612, loss_adv3 = 1339.600, loss_ loss_D1 = 48.369, loss_D2 = 57.115, loss_D3 = 66.986
+epoch 18, lr 0.006692:  77% 3144/4072 [03:59<01:10, 13.12it/s, loss=0.383235]
+loss for train : 0.367836
+iter =       18/      50, loss_seg1 = 42.725, loss_seg2 = 46.072, loss_seg3 = 55.762, loss_adv1 = 2290.672, loss_adv2 = 1923.971, loss_adv3 = 1376.187, loss_ loss_D1 = 47.874, loss_D2 = 55.409, loss_D3 = 65.639
+epoch 19, lr 0.006504:  77% 3144/4072 [04:01<01:11, 13.03it/s, loss=0.392170]
+loss for train : 0.354488
+iter =       19/      50, loss_seg1 = 41.063, loss_seg2 = 44.385, loss_seg3 = 53.866, loss_adv1 = 2276.156, loss_adv2 = 1981.833, loss_adv3 = 1425.966, loss_ loss_D1 = 47.849, loss_D2 = 55.597, loss_D3 = 64.931
+epoch 20, lr 0.006314:  77% 3144/4072 [04:00<01:11, 13.07it/s, loss=0.437834]
+loss for train : 0.346085
+iter =       20/      50, loss_seg1 = 40.064, loss_seg2 = 43.306, loss_seg3 = 52.641, loss_adv1 = 2258.585, loss_adv2 = 1980.568, loss_adv3 = 1430.867, loss_ loss_D1 = 48.984, loss_D2 = 55.451, loss_D3 = 64.481
+epoch 21, lr 0.006125:  77% 3144/4072 [04:01<01:11, 13.01it/s, loss=0.339211]
+loss for train : 0.338691
+iter =       21/      50, loss_seg1 = 39.170, loss_seg2 = 42.373, loss_seg3 = 51.563, loss_adv1 = 2267.026, loss_adv2 = 2017.647, loss_adv3 = 1455.290, loss_ loss_D1 = 47.606, loss_D2 = 54.652, loss_D3 = 63.989
+epoch 22, lr 0.005934:  77% 3144/4072 [04:01<01:11, 13.04it/s, loss=0.316919]
+loss for train : 0.343807
+iter =       22/      50, loss_seg1 = 39.861, loss_seg2 = 43.048, loss_seg3 = 52.208, loss_adv1 = 2288.113, loss_adv2 = 2070.900, loss_adv3 = 1485.420, loss_ loss_D1 = 46.551, loss_D2 = 52.972, loss_D3 = 62.693
+epoch 23, lr 0.005743:  77% 3144/4072 [04:00<01:11, 13.06it/s, loss=0.308511]
+loss for train : 0.329604
+iter =       23/      50, loss_seg1 = 38.028, loss_seg2 = 41.190, loss_seg3 = 50.316, loss_adv1 = 2302.497, loss_adv2 = 2104.869, loss_adv3 = 1502.959, loss_ loss_D1 = 47.626, loss_D2 = 51.832, loss_D3 = 61.855
+epoch 24, lr 0.005551:  77% 3144/4072 [04:01<01:11, 13.04it/s, loss=0.287634]
+loss for train : 0.326499
+iter =       24/      50, loss_seg1 = 37.690, loss_seg2 = 40.825, loss_seg3 = 49.799, loss_adv1 = 2280.433, loss_adv2 = 2113.264, loss_adv3 = 1510.176, loss_ loss_D1 = 46.832, loss_D2 = 52.404, loss_D3 = 61.721
+epoch 25, lr 0.005359:  77% 3144/4072 [04:00<01:10, 13.09it/s, loss=0.377717]
+loss for train : 0.315996
+iter =       25/      50, loss_seg1 = 36.421, loss_seg2 = 39.463, loss_seg3 = 48.302, loss_adv1 = 2242.742, loss_adv2 = 2079.477, loss_adv3 = 1474.033, loss_ loss_D1 = 47.309, loss_D2 = 52.325, loss_D3 = 61.043
+epoch 26, lr 0.005166:  77% 3144/4072 [04:00<01:11, 13.06it/s, loss=0.214374]
+loss for train : 0.313731
+iter =       26/      50, loss_seg1 = 36.064, loss_seg2 = 39.168, loss_seg3 = 48.065, loss_adv1 = 2210.075, loss_adv2 = 2080.170, loss_adv3 = 1470.876, loss_ loss_D1 = 48.139, loss_D2 = 52.146, loss_D3 = 59.964
+epoch 27, lr 0.004971:  77% 3144/4072 [04:00<01:10, 13.09it/s, loss=0.341904]
+loss for train : 0.307276
+iter =       27/      50, loss_seg1 = 35.292, loss_seg2 = 38.347, loss_seg3 = 47.121, loss_adv1 = 2203.789, loss_adv2 = 2107.993, loss_adv3 = 1511.429, loss_ loss_D1 = 46.905, loss_D2 = 51.077, loss_D3 = 58.218
+epoch 28, lr 0.004776:  77% 3144/4072 [04:00<01:11, 13.05it/s, loss=0.237574]
+loss for train : 0.305707
+iter =       28/      50, loss_seg1 = 35.081, loss_seg2 = 38.161, loss_seg3 = 46.900, loss_adv1 = 2204.853, loss_adv2 = 2107.527, loss_adv3 = 1495.957, loss_ loss_D1 = 47.172, loss_D2 = 51.218, loss_D3 = 57.327
+epoch 29, lr 0.004581:  77% 3144/4072 [04:02<01:11, 12.99it/s, loss=0.286334]
+loss for train : 0.298072
+iter =       29/      50, loss_seg1 = 34.151, loss_seg2 = 37.172, loss_seg3 = 45.819, loss_adv1 = 2194.659, loss_adv2 = 2106.023, loss_adv3 = 1500.337, loss_ loss_D1 = 47.262, loss_D2 = 50.749, loss_D3 = 56.369
+epoch 30, lr 0.004384:  77% 3144/4072 [04:01<01:11, 13.03it/s, loss=0.343980]
+loss for train : 0.296829
+iter =       30/      50, loss_seg1 = 33.973, loss_seg2 = 37.039, loss_seg3 = 45.642, loss_adv1 = 2160.715, loss_adv2 = 2129.971, loss_adv3 = 1537.258, loss_ loss_D1 = 47.538, loss_D2 = 50.127, loss_D3 = 54.622
+epoch 31, lr 0.004186:  77% 3144/4072 [04:01<01:11, 13.04it/s, loss=0.365866]
+loss for train : 0.296695
+iter =       31/      50, loss_seg1 = 33.942, loss_seg2 = 37.002, loss_seg3 = 45.657, loss_adv1 = 2169.100, loss_adv2 = 2115.522, loss_adv3 = 1536.908, loss_ loss_D1 = 46.196, loss_D2 = 48.739, loss_D3 = 53.430
+epoch 32, lr 0.003987:  77% 3144/4072 [04:00<01:10, 13.08it/s, loss=0.212834]
+loss for train : 0.291113
+iter =       32/      50, loss_seg1 = 33.307, loss_seg2 = 36.297, loss_seg3 = 44.803, loss_adv1 = 2155.194, loss_adv2 = 2096.966, loss_adv3 = 1533.047, loss_ loss_D1 = 46.892, loss_D2 = 49.178, loss_D3 = 52.642
+epoch 33, lr 0.003787:  77% 3144/4072 [04:02<01:11, 12.99it/s, loss=0.343241]
+loss for train : 0.289098
+iter =       33/      50, loss_seg1 = 33.062, loss_seg2 = 36.060, loss_seg3 = 44.494, loss_adv1 = 2143.793, loss_adv2 = 2101.898, loss_adv3 = 1513.282, loss_ loss_D1 = 46.474, loss_D2 = 47.752, loss_D3 = 51.833
+epoch 34, lr 0.003586:  77% 3144/4072 [04:00<01:10, 13.07it/s, loss=0.251828]
+loss for train : 0.286824
+iter =       34/      50, loss_seg1 = 32.760, loss_seg2 = 35.753, loss_seg3 = 44.209, loss_adv1 = 2121.396, loss_adv2 = 2087.986, loss_adv3 = 1494.243, loss_ loss_D1 = 46.432, loss_D2 = 48.426, loss_D3 = 51.268
+epoch 35, lr 0.003384:  77% 3144/4072 [04:00<01:10, 13.08it/s, loss=0.245517]
+loss for train : 0.286018
+iter =       35/      50, loss_seg1 = 32.649, loss_seg2 = 35.626, loss_seg3 = 44.129, loss_adv1 = 2142.967, loss_adv2 = 2110.883, loss_adv3 = 1512.588, loss_ loss_D1 = 45.444, loss_D2 = 47.663, loss_D3 = 49.919
+epoch 36, lr 0.003180:  77% 3144/4072 [04:01<01:11, 13.03it/s, loss=0.304068]
+loss for train : 0.283625
+iter =       36/      50, loss_seg1 = 32.341, loss_seg2 = 35.330, loss_seg3 = 43.794, loss_adv1 = 2124.379, loss_adv2 = 2113.511, loss_adv3 = 1528.084, loss_ loss_D1 = 45.476, loss_D2 = 46.643, loss_D3 = 47.994
+epoch 37, lr 0.002975:  77% 3144/4072 [04:00<01:11, 13.06it/s, loss=0.218902]
+loss for train : 0.282769
+iter =       37/      50, loss_seg1 = 32.258, loss_seg2 = 35.236, loss_seg3 = 43.634, loss_adv1 = 2117.210, loss_adv2 = 2111.248, loss_adv3 = 1520.413, loss_ loss_D1 = 46.354, loss_D2 = 46.533, loss_D3 = 46.988
+epoch 38, lr 0.002768:  77% 3144/4072 [04:00<01:11, 13.06it/s, loss=0.306848]
+loss for train : 0.277528
+iter =       38/      50, loss_seg1 = 31.622, loss_seg2 = 34.563, loss_seg3 = 42.884, loss_adv1 = 2121.273, loss_adv2 = 2140.972, loss_adv3 = 1543.555, loss_ loss_D1 = 44.361, loss_D2 = 44.503, loss_D3 = 45.374
+epoch 39, lr 0.002560:  77% 3144/4072 [04:01<01:11, 13.04it/s, loss=0.259508]
+loss for train : 0.277664
+iter =       39/      50, loss_seg1 = 31.638, loss_seg2 = 34.579, loss_seg3 = 42.905, loss_adv1 = 2124.833, loss_adv2 = 2136.850, loss_adv3 = 1536.610, loss_ loss_D1 = 44.893, loss_D2 = 44.946, loss_D3 = 45.703
+epoch 40, lr 0.002349:  77% 3144/4072 [04:02<01:11, 12.98it/s, loss=0.298830]
+loss for train : 0.277142
+iter =       40/      50, loss_seg1 = 31.549, loss_seg2 = 34.498, loss_seg3 = 42.870, loss_adv1 = 2112.965, loss_adv2 = 2126.856, loss_adv3 = 1533.361, loss_ loss_D1 = 44.312, loss_D2 = 43.956, loss_D3 = 44.380
+epoch 41, lr 0.002137:  77% 3144/4072 [04:01<01:11, 13.04it/s, loss=0.285133]
+loss for train : 0.275652
+iter =       41/      50, loss_seg1 = 31.389, loss_seg2 = 34.322, loss_seg3 = 42.619, loss_adv1 = 2115.764, loss_adv2 = 2139.660, loss_adv3 = 1533.773, loss_ loss_D1 = 43.920, loss_D2 = 42.818, loss_D3 = 43.853
+epoch 42, lr 0.001922:  77% 3144/4072 [04:02<01:11, 12.98it/s, loss=0.222307]
+loss for train : 0.272839
+iter =       42/      50, loss_seg1 = 30.992, loss_seg2 = 33.956, loss_seg3 = 42.278, loss_adv1 = 2103.795, loss_adv2 = 2124.796, loss_adv3 = 1533.081, loss_ loss_D1 = 43.867, loss_D2 = 43.278, loss_D3 = 42.563
+epoch 43, lr 0.001704:  77% 3144/4072 [04:01<01:11, 13.03it/s, loss=0.245339]
+loss for train : 0.271749
+iter =       43/      50, loss_seg1 = 30.925, loss_seg2 = 33.839, loss_seg3 = 42.033, loss_adv1 = 2107.550, loss_adv2 = 2148.082, loss_adv3 = 1533.202, loss_ loss_D1 = 43.427, loss_D2 = 41.934, loss_D3 = 41.668
+epoch 44, lr 0.001483:  77% 3144/4072 [04:01<01:11, 13.04it/s, loss=0.245009]
+loss for train : 0.269394
+iter =       44/      50, loss_seg1 = 30.651, loss_seg2 = 33.526, loss_seg3 = 41.695, loss_adv1 = 2102.662, loss_adv2 = 2138.119, loss_adv3 = 1532.975, loss_ loss_D1 = 43.667, loss_D2 = 41.574, loss_D3 = 41.026
+epoch 45, lr 0.001259:  77% 3144/4072 [04:00<01:11, 13.06it/s, loss=0.238031]
+loss for train : 0.270211
+iter =       45/      50, loss_seg1 = 30.738, loss_seg2 = 33.639, loss_seg3 = 41.816, loss_adv1 = 2102.374, loss_adv2 = 2162.013, loss_adv3 = 1550.724, loss_ loss_D1 = 42.920, loss_D2 = 40.434, loss_D3 = 40.389
+epoch 46, lr 0.001030:  77% 3144/4072 [04:01<01:11, 12.99it/s, loss=0.233425]
+loss for train : 0.270577
+iter =       46/      50, loss_seg1 = 30.745, loss_seg2 = 33.685, loss_seg3 = 41.907, loss_adv1 = 2110.043, loss_adv2 = 2180.156, loss_adv3 = 1555.000, loss_ loss_D1 = 42.831, loss_D2 = 40.263, loss_D3 = 39.825
+epoch 47, lr 0.000795:  77% 3144/4072 [04:00<01:11, 13.06it/s, loss=0.262400]
+loss for train : 0.266662
+iter =       47/      50, loss_seg1 = 30.325, loss_seg2 = 33.189, loss_seg3 = 41.284, loss_adv1 = 2108.652, loss_adv2 = 2182.479, loss_adv3 = 1550.620, loss_ loss_D1 = 42.158, loss_D2 = 39.508, loss_D3 = 39.436
+epoch 48, lr 0.000552:  77% 3144/4072 [04:01<01:11, 13.03it/s, loss=0.330693]
+loss for train : 0.265591
+iter =       48/      50, loss_seg1 = 30.188, loss_seg2 = 33.049, loss_seg3 = 41.140, loss_adv1 = 2130.361, loss_adv2 = 2183.922, loss_adv3 = 1558.683, loss_ loss_D1 = 41.506, loss_D2 = 39.462, loss_D3 = 38.629
+epoch 49, lr 0.000296:  77% 3144/4072 [04:00<01:11, 13.07it/s, loss=0.281235]
+loss for train : 0.269718
+iter =       49/      50, loss_seg1 = 30.681, loss_seg2 = 33.571, loss_seg3 = 41.748, loss_adv1 = 2116.944, loss_adv2 = 2180.477, loss_adv3 = 1557.685, loss_ loss_D1 = 41.019, loss_D2 = 38.742, loss_D3 = 38.328
+start val!
+precision per pixel for test: 0.668
+mIoU for validation: 0.230
+mIoU per class: [8.37586406e-01 5.14135576e-02 6.96560008e-01 1.10844902e-01
+ 4.52757610e-02 1.02124871e-01 6.04898660e-02 8.53537231e-02
+ 5.59979297e-01 4.88535143e-02 7.11896038e-01 2.25443196e-01
+ 8.33089266e-03 6.61688548e-01 8.62279284e-02 8.39241147e-02
+ 1.00140288e-04 3.98052879e-05 0.00000000e+00]
