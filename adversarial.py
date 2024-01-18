@@ -123,7 +123,7 @@ def train(args, model, optimizer, dataloader_train, dataloader_val):
             writer.add_scalar('epoch/precision_val', precision, epoch)
             writer.add_scalar('epoch/miou val', miou, epoch)
 
-def train_adversarial(args, model, model_D1, model_D2, model_D3, optimizer, optimizer_D1, optimizer_D2, optimizer_D3, dataloader_train, dataloader_target, dataloader_val, iter_size):
+def train_adversarial(args, model, model_D1, optimizer, optimizer_D1, dataloader_train, dataloader_target, dataloader_val, iter_size):
     # writer = SummaryWriter(comment=''.format(args.optimizer))
 
     scaler = amp.GradScaler()
@@ -138,27 +138,13 @@ def train_adversarial(args, model, model_D1, model_D2, model_D3, optimizer, opti
     miou_list = []
     step = 0
     for epoch in range(args.num_epochs):
-        loss_seg_value1 = 0
         loss_adv_target_value1 = 0
         loss_D_value1 = 0
 
-        loss_seg_value2 = 0
-        loss_adv_target_value2 = 0
-        loss_D_value2 = 0
-
-        loss_seg_value3 = 0
-        loss_adv_target_value3 = 0
-        loss_D_value3 = 0
-
         lr = poly_lr_scheduler(optimizer, args.learning_rate, iter=epoch, max_iter=args.num_epochs)
-        adjust_learning_rate_D(optimizer_D1, epoch, args.learning_rate_D, args.num_epochs, power=0.9)
-        adjust_learning_rate_D(optimizer_D2, epoch, args.learning_rate_D, args.num_epochs, power=0.9)
-        adjust_learning_rate_D(optimizer_D3, epoch, args.learning_rate_D, args.num_epochs, power=0.9)
 
         model.train()
         model_D1.train()
-        model_D2.train()
-        model_D3.train()
 
         tq = tqdm(total=(len(dataloader_target) + len (dataloader_train)) * args.batch_size)
         tq.set_description('epoch %d, lr %f' % (epoch, lr))
@@ -171,16 +157,10 @@ def train_adversarial(args, model, model_D1, model_D2, model_D3, optimizer, opti
 
             optimizer.zero_grad()
             optimizer_D1.zero_grad()
-            optimizer_D2.zero_grad()
-            optimizer_D3.zero_grad()
 
             # train G
             # don't accumulte grads in D
             for param in model_D1.parameters():
-                param.requires_grad = False
-            for param in model_D2.parameters():
-                param.requires_grad = False
-            for param in model_D3.parameters():
                 param.requires_grad = False
 
             # train with source
@@ -194,114 +174,55 @@ def train_adversarial(args, model, model_D1, model_D2, model_D3, optimizer, opti
                 loss = loss1 + loss2 + loss3
 
             scaler.scale(loss).backward()
-            loss_seg_value1 += loss1.data.cpu().numpy()
-            loss_seg_value2 += loss2.data.cpu().numpy()
-            loss_seg_value3 += loss3.data.cpu().numpy()
 
             with amp.autocast():
                 D_out1 = model_D1(F.softmax(pred_target1, dim=1))
-                D_out2 = model_D2(F.softmax(pred_target2, dim=1))
-                D_out3 = model_D2(F.softmax(pred_target3, dim=1))
 
                 loss_adv_target1 = loss_bce(D_out1, 
                                             torch.FloatTensor(D_out1.data.size())
                                             .fill_(source_label)
                                             .cuda())
-                loss_adv_target2 = loss_bce(D_out2, 
-                                            torch.FloatTensor(D_out2.data.size())
-                                            .fill_(source_label)
-                                            .cuda())
-                loss_adv_target3 = loss_bce(D_out3, 
-                                            torch.FloatTensor(D_out3.data.size())
-                                            .fill_(source_label)
-                                            .cuda())
                 
-            loss_adv_target = args.lambda_adv_target1 * loss_adv_target1 + args.lambda_adv_target2 * loss_adv_target2 + args.lambda_adv_target3 * loss_adv_target3
+            loss_adv_target = args.lambda_adv_target1 * loss_adv_target1 
             
             scaler.scale(loss_adv_target).backward()
             loss_adv_target_value1 += loss_adv_target1.data.cpu().numpy()
-            loss_adv_target_value2 += loss_adv_target2.data.cpu().numpy()
-            loss_adv_target_value3 += loss_adv_target3.data.cpu().numpy()
 
             # train D
             # bring back requires_grad
             for param in model_D1.parameters():
                 param.requires_grad = True
-            for param in model_D2.parameters():
-                param.requires_grad = True
-            for param in model_D3.parameters():
-                param.requires_grad = True
 
             # train with source
             output = output.detach()
-            out16 = out16.detach()
-            out32 = out32.detach()
 
             with amp.autocast():
                 D_out1 = model_D1(F.softmax(output, dim=1))
-                D_out2 = model_D2(F.softmax(out16, dim=1))
-                D_out3 = model_D3(F.softmax(out32, dim=1))                        
 
                 loss_D1_source = loss_bce(D_out1, 
                                             torch.FloatTensor(D_out1.data.size())
                                             .fill_(source_label)
                                             .cuda())
-                loss_D2_source = loss_bce(D_out2, 
-                                            torch.FloatTensor(D_out2.data.size())
-                                            .fill_(source_label)
-                                            .cuda())
-                loss_D3_source = loss_bce(D_out3, 
-                                            torch.FloatTensor(D_out3.data.size())
-                                            .fill_(source_label)
-                                            .cuda())
-
-            loss_D1_source = loss_D1_source / 2
-            loss_D2_source = loss_D2_source / 2    
-            loss_D3_source = loss_D3_source / 2    
 
             scaler.scale(loss_D1_source).backward()  
-            scaler.scale(loss_D2_source).backward()
-            scaler.scale(loss_D3_source).backward()
 
             loss_D_value1 += loss_D1_source.data.cpu().numpy()
-            loss_D_value2 += loss_D2_source.data.cpu().numpy()
-            loss_D_value3 += loss_D3_source.data.cpu().numpy()
 
             # train with target
             pred_target1 = pred_target1.detach()
-            pred_target2 = pred_target2.detach()
-            pred_target3 = pred_target3.detach()
 
             with amp.autocast():
                 D_out1 = model_D1(F.softmax(pred_target1, dim=1))
-                D_out2 = model_D2(F.softmax(pred_target2, dim=1))
-                D_out3 = model_D3(F.softmax(pred_target3, dim=1))                        
 
                 loss_D1_target = loss_bce(D_out1, 
                                             torch.FloatTensor(D_out1.data.size())
                                             .fill_(target_label)
                                             .cuda())
-                loss_D2_target = loss_bce(D_out2, 
-                                            torch.FloatTensor(D_out2.data.size())
-                                            .fill_(target_label)
-                                            .cuda())
-                loss_D3_target = loss_bce(D_out3, 
-                                            torch.FloatTensor(D_out3.data.size())
-                                            .fill_(target_label)
-                                            .cuda())
-                
-            loss_D1_target = loss_D1_target / 2
-            loss_D2_target = loss_D2_target / 2
-            loss_D3_target = loss_D3_target / 2
             
             scaler.scale(loss_D1_target).backward()
-            scaler.scale(loss_D2_target).backward()
-            scaler.scale(loss_D3_target).backward()
 
             scaler.step(optimizer)
             scaler.step(optimizer_D1)
-            scaler.step(optimizer_D2)
-            scaler.step(optimizer_D3)
             scaler.update()
 
             tq.update(args.batch_size*2)
@@ -313,8 +234,6 @@ def train_adversarial(args, model, model_D1, model_D2, model_D3, optimizer, opti
         loss_train_mean = np.mean(loss_record)
         # writer.add_scalar('epoch/loss_epoch_train', float(loss_train_mean), epoch)
         print('loss for train : %f' % (loss_train_mean))
-        print('iter = {0:8d}/{1:8d}, loss_seg1 = {2:.3f}, loss_seg2 = {3:.3f}, loss_seg3 = {4:.3f}, loss_adv1 = {5:.3f}, loss_adv2 = {6:.3f}, loss_adv3 = {7:.3f}, loss_ loss_D1 = {8:.3f}, loss_D2 = {9:.3f}, loss_D3 = {10:.3f}'.format(
-            epoch, args.num_epochs, loss_seg_value1, loss_seg_value2, loss_seg_value3, loss_adv_target_value1, loss_adv_target_value2, loss_adv_target_value3, loss_D_value1, loss_D_value2, loss_D_value3))
 
         if epoch % args.checkpoint_step == 0 and epoch != 0:
             import os
@@ -322,8 +241,6 @@ def train_adversarial(args, model, model_D1, model_D2, model_D3, optimizer, opti
                 os.mkdir(args.save_model_path)
             torch.save(model.module.state_dict(), os.path.join(args.save_model_path, 'latest.pth'))
             torch.save(model_D1.module.state_dict(), os.path.join(args.save_model_path, 'latest_D1.pth'))
-            torch.save(model_D2.module.state_dict(), os.path.join(args.save_model_path, 'latest_D2.pth'))
-            torch.save(model_D3.module.state_dict(), os.path.join(args.save_model_path, 'latest_D3.pth'))
 
         if epoch % args.validation_step == 0 and epoch != 0:
             precision, miou = val(args, model, dataloader_val)
@@ -334,8 +251,6 @@ def train_adversarial(args, model, model_D1, model_D2, model_D3, optimizer, opti
                 os.makedirs(args.save_model_path, exist_ok=True)
                 torch.save(model.module.state_dict(), os.path.join(args.save_model_path, 'best.pth'))
                 torch.save(model_D1.module.state_dict(), os.path.join(args.save_model_path, 'best_D1.pth'))
-                torch.save(model_D2.module.state_dict(), os.path.join(args.save_model_path, 'best_D2.pth'))
-                torch.save(model_D3.module.state_dict(), os.path.join(args.save_model_path, 'best_D3.pth'))
             # writer.add_scalar('epoch/precision_val', precision, epoch)
             # writer.add_scalar('epoch/miou val', miou, epoch)
     plt.plot(range(args.num_epochs), miou_list)
@@ -381,7 +296,7 @@ def parse_args():
     parse.add_argument('--augmentation',
                        dest='augmentation',
                        type=str,
-                       default=None,
+                       default='H',
     )
     parse.add_argument('--backbone',
                        dest='backbone',
@@ -489,32 +404,23 @@ def main():
     dataloader_target = DataLoader(target_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers, drop_last=False)
     dataloader_val = DataLoader(val_dataset, batch_size=1, shuffle=False, num_workers=args.num_workers, drop_last=False)
 
-    if args.pretrain_path != './checkpoints/STDCNet813M_73.91.tar' and args.pretrain_path_D2 is not None and args.pretrain_path_D1 is not None and args.pretrain_path_D3 is not None:
+    if args.pretrain_path != './checkpoints/STDCNet813M_73.91.tar' and args.pretrain_path_D1 is not None:
+        print("Starting training with checkpoints " + args.pretrain_path + " " + args.pretrain_path_D1)
         model = BiSeNet(backbone=args.backbone, n_classes=n_classes, use_conv_last=args.use_conv_last)
         model.load_state_dict(torch.load(args.pretrain_path), strict=False)
         model_D1 = FCDiscriminator(num_classes=n_classes, pretrain_model=args.pretrain_path_D1)
-        model_D1.load_state_dict(torch.load(args.pretrain_path), strict=False)
-        model_D2 = FCDiscriminator(num_classes=n_classes, pretrain_model=args.pretrain_path_D2)
-        model_D2.load_state_dict(torch.load(args.pretrain_path), strict=False)
-        model_D3 = FCDiscriminator(num_classes=n_classes, pretrain_model=args.pretrain_path_D3)
-        model_D3.load_state_dict(torch.load(args.pretrain_path), strict=False)
+        model_D1.load_state_dict(torch.load(args.pretrain_path_D1), strict=False)
     else:        
         model = BiSeNet(backbone=args.backbone, n_classes=n_classes, pretrain_model=args.pretrain_path, use_conv_last=args.use_conv_last)
         model_D1 = FCDiscriminator(num_classes=n_classes)
-        model_D2 = FCDiscriminator(num_classes=n_classes)
-        model_D3 = FCDiscriminator(num_classes=n_classes)
 
     if torch.cuda.is_available() and args.use_gpu:
         model = torch.nn.DataParallel(model).cuda()
         model_D1 = torch.nn.DataParallel(model_D1).cuda()
-        model_D2 = torch.nn.DataParallel(model_D2).cuda()
-        model_D3 = torch.nn.DataParallel(model_D3).cuda()
 
     ## optimizer
         
     optimizer_D1 = torch.optim.Adam(model_D1.parameters(), lr=args.learning_rate_D, betas=(0.9, 0.99))
-    optimizer_D2 = torch.optim.Adam(model_D2.parameters(), lr=args.learning_rate_D, betas=(0.9, 0.99))
-    optimizer_D3 = torch.optim.Adam(model_D3.parameters(), lr=args.learning_rate_D, betas=(0.9, 0.99))
     
     # build optimizer
     if args.optimizer == 'rmsprop':
@@ -531,12 +437,8 @@ def main():
     train_adversarial(args, 
                       model, 
                       model_D1, 
-                      model_D2,
-                      model_D3, 
                       optimizer, 
                       optimizer_D1, 
-                      optimizer_D2, 
-                      optimizer_D3,
                       dataloader_train, 
                       dataloader_target, 
                       dataloader_val,
