@@ -15,22 +15,20 @@ from utils import reverse_one_hot, compute_global_accuracy, fast_hist, per_class
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
-from model.discriminator import FCDiscriminator
+from model.discriminator_dsc import FCDiscriminator
 import torch.nn.functional as F
+from utils import FDA_source_to_target
 
 logger = logging.getLogger()
 
-"""
 def lr_poly(base_lr, iter, max_iter, power):
     return base_lr * ((1 - float(iter) / max_iter) ** (power))
-"""
-"""
+
 def adjust_learning_rate_D(optimizer, i_iter, lrate, num_steps, power):
     lr = lr_poly(lrate, i_iter, num_steps, power)
     optimizer.param_groups[0]['lr'] = lr
     if len(optimizer.param_groups) > 1:
         optimizer.param_groups[1]['lr'] = lr * 10
-"""
 
 def val(args, model, dataloader):
     print('start val!')
@@ -143,187 +141,80 @@ def train_adversarial(args, model, model_D1, optimizer, optimizer_D1, dataloader
     for epoch in range(args.num_epochs):
         loss_adv_target_value1 = 0
         loss_D_value1 = 0
-<<<<<<< HEAD
-        """
-        loss_seg_value2 = 0
-        loss_adv_target_value2 = 0
-        loss_D_value2 = 0
-
-        loss_seg_value3 = 0
-        loss_adv_target_value3 = 0
-        loss_D_value3 = 0
-        """
-        lr = poly_lr_scheduler(optimizer, args.learning_rate, iter=epoch, max_iter=args.num_epochs)
-        lr_D1 = poly_lr_scheduler(optimizer_D1, args.learning_rate_D, iter=epoch, max_iter=args.num_epochs)
-        # adjust_learning_rate_D(optimizer_D2, epoch, args.learning_rate_D, args.num_epochs, power=0.9)
-        # adjust_learning_rate_D(optimizer_D3, epoch, args.learning_rate_D, args.num_epochs, power=0.9)
-
-        model.train()
-        model_D1.train()
-        # model_D2.train()
-        # model_D3.train()
-=======
 
         lr = poly_lr_scheduler(optimizer, args.learning_rate, iter=epoch, max_iter=args.num_epochs)
 
         model.train()
         model_D1.train()
->>>>>>> 4e1abb856b0d451fa9c44714b6da122f5424a5eb
 
         tq = tqdm(total=(len(dataloader_target) + len (dataloader_train)) * args.batch_size)
-        tq.set_description('epoch %d, lr %f' % (epoch, lr_D1))
+        tq.set_description('epoch %d, lr %f' % (epoch, lr))
         loss_record = []
 
+        mean_img = torch.zeros(1, 1)
+
         for (data, label), (data_t, _) in zip(dataloader_train, dataloader_target):
-            data = data.cuda()
-            data_t = data_t.cuda()
+            #FDA
+            # 1. source to target, target to target
+            src_in_trg = FDA_source_to_target( data, data_t, L=args.LB )            # src_lbl
+            trg_in_trg = trg_img
+
+            # 2. subtract mean
+            src_img = src_in_trg.clone() - mean_img                                 # src, src_lbl
+            trg_img = trg_in_trg.clone() - mean_img                                 # trg, trg_lbl
+
+            data = src_img.cuda()
+            data_t = trg_img.cuda()
             label = label.long().cuda()
 
             optimizer.zero_grad()
             optimizer_D1.zero_grad()
-<<<<<<< HEAD
-            # optimizer_D2.zero_grad()
-            # optimizer_D3.zero_grad()
-=======
->>>>>>> 4e1abb856b0d451fa9c44714b6da122f5424a5eb
 
             # train G
             # don't accumulte grads in D
             for param in model_D1.parameters():
                 param.requires_grad = False
-<<<<<<< HEAD
-            """
-            for param in model_D2.parameters():
-                param.requires_grad = False
-            for param in model_D3.parameters():
-                param.requires_grad = False
-            """
-=======
 
->>>>>>> 4e1abb856b0d451fa9c44714b6da122f5424a5eb
             # train with source
             with amp.autocast():
-                output, _ , _  = model(data)
-                pred_target1, _ , _  = model(data_t)                    
+                output, out16, out32 = model(data)
+                pred_target1, pred_target2, pred_target3 = model(data_t)                    
                 
                 loss1 = loss_func(output, label.squeeze(1))
-                # loss2 = loss_func(out16, label.squeeze(1))
-                # loss3 = loss_func(out32, label.squeeze(1))
-                loss = loss1 # + loss2 + loss3
+                loss2 = loss_func(out16, label.squeeze(1))
+                loss3 = loss_func(out32, label.squeeze(1))
+                loss = loss1 + loss2 + loss3
 
             scaler.scale(loss).backward()
-<<<<<<< HEAD
-            loss_seg_value1 += loss1.data.cpu().numpy()
-            # loss_seg_value2 += loss2.data.cpu().numpy()
-            # loss_seg_value3 += loss3.data.cpu().numpy()
 
             with amp.autocast():
                 D_out1 = model_D1(F.softmax(pred_target1, dim=1))
-                # D_out2 = model_D2(F.softmax(pred_target2, dim=1))
-                # D_out3 = model_D2(F.softmax(pred_target3, dim=1))
-=======
-
-            with amp.autocast():
-                D_out1 = model_D1(F.softmax(pred_target1, dim=1))
->>>>>>> 4e1abb856b0d451fa9c44714b6da122f5424a5eb
 
                 loss_adv_target1 = loss_bce(D_out1, 
                                             torch.FloatTensor(D_out1.data.size())
                                             .fill_(source_label)
                                             .cuda())
-<<<<<<< HEAD
-                """
-                loss_adv_target2 = loss_bce(D_out2, 
-                                            torch.FloatTensor(D_out2.data.size())
-                                            .fill_(source_label)
-                                            .cuda())
-                """
-                """
-                loss_adv_target3 = loss_bce(D_out3, 
-                                            torch.FloatTensor(D_out3.data.size())
-                                            .fill_(source_label)
-                                            .cuda())
-                """
-            loss_adv_target = args.lambda_adv_target1 * loss_adv_target1 # + args.lambda_adv_target2 * loss_adv_target2 + args.lambda_adv_target3 * loss_adv_target3
-            
-            scaler.scale(loss_adv_target).backward()
-            loss_adv_target_value1 += loss_adv_target1.data.cpu().numpy()
-            # loss_adv_target_value2 += loss_adv_target2.data.cpu().numpy()
-            # loss_adv_target_value3 += loss_adv_target3.data.cpu().numpy()
-=======
                 
             loss_adv_target = args.lambda_adv_target1 * loss_adv_target1 
             
             scaler.scale(loss_adv_target).backward()
             loss_adv_target_value1 += loss_adv_target1.data.cpu().numpy()
->>>>>>> 4e1abb856b0d451fa9c44714b6da122f5424a5eb
 
             # train D
             # bring back requires_grad
             for param in model_D1.parameters():
                 param.requires_grad = True
-<<<<<<< HEAD
-            """
-            for param in model_D2.parameters():
-                param.requires_grad = True
-            for param in model_D3.parameters():
-                param.requires_grad = True
-            """
-            # train with source
-            output = output.detach()
-            # out16 = out16.detach()
-            # out32 = out32.detach()
-
-            with amp.autocast():
-                D_out1 = model_D1(F.softmax(output, dim=1))
-                # D_out2 = model_D2(F.softmax(out16, dim=1))
-                # D_out3 = model_D3(F.softmax(out32, dim=1))                        
-=======
 
             # train with source
             output = output.detach()
 
             with amp.autocast():
                 D_out1 = model_D1(F.softmax(output, dim=1))
->>>>>>> 4e1abb856b0d451fa9c44714b6da122f5424a5eb
 
                 loss_D1_source = loss_bce(D_out1, 
                                             torch.FloatTensor(D_out1.data.size())
                                             .fill_(source_label)
                                             .cuda())
-<<<<<<< HEAD
-                """
-                loss_D2_source = loss_bce(D_out2, 
-                                            torch.FloatTensor(D_out2.data.size())
-                                            .fill_(source_label)
-                                            .cuda())
-                loss_D3_source = loss_bce(D_out3, 
-                                            torch.FloatTensor(D_out3.data.size())
-                                            .fill_(source_label)
-                                            .cuda())
-                """
-            loss_D1_source = loss_D1_source / 2
-            # loss_D2_source = loss_D2_source / 2    
-            # loss_D3_source = loss_D3_source / 2    
-
-            scaler.scale(loss_D1_source).backward()  
-            # scaler.scale(loss_D2_source).backward()
-            # scaler.scale(loss_D3_source).backward()
-
-            loss_D_value1 += loss_D1_source.data.cpu().numpy()
-            # loss_D_value2 += loss_D2_source.data.cpu().numpy()
-            # loss_D_value3 += loss_D3_source.data.cpu().numpy()
-
-            # train with target
-            pred_target1 = pred_target1.detach()
-            # pred_target2 = pred_target2.detach()
-            # pred_target3 = pred_target3.detach()
-
-            with amp.autocast():
-                D_out1 = model_D1(F.softmax(pred_target1, dim=1))
-                # D_out2 = model_D2(F.softmax(pred_target2, dim=1))
-                # D_out3 = model_D3(F.softmax(pred_target3, dim=1))                        
-=======
 
             scaler.scale(loss_D1_source).backward()  
 
@@ -334,43 +225,16 @@ def train_adversarial(args, model, model_D1, optimizer, optimizer_D1, dataloader
 
             with amp.autocast():
                 D_out1 = model_D1(F.softmax(pred_target1, dim=1))
->>>>>>> 4e1abb856b0d451fa9c44714b6da122f5424a5eb
 
                 loss_D1_target = loss_bce(D_out1, 
                                             torch.FloatTensor(D_out1.data.size())
                                             .fill_(target_label)
                                             .cuda())
-<<<<<<< HEAD
-                """
-                loss_D2_target = loss_bce(D_out2, 
-                                            torch.FloatTensor(D_out2.data.size())
-                                            .fill_(target_label)
-                                            .cuda())
-                loss_D3_target = loss_bce(D_out3, 
-                                            torch.FloatTensor(D_out3.data.size())
-                                            .fill_(target_label)
-                                            .cuda())
-                """
-                
-            loss_D1_target = loss_D1_target / 2
-            # loss_D2_target = loss_D2_target / 2
-            # loss_D3_target = loss_D3_target / 2
-            
-            scaler.scale(loss_D1_target).backward()
-            # scaler.scale(loss_D2_target).backward()
-            # scaler.scale(loss_D3_target).backward()
-
-            scaler.step(optimizer)
-            scaler.step(optimizer_D1)
-            # scaler.step(optimizer_D2)
-            # scaler.step(optimizer_D3)
-=======
             
             scaler.scale(loss_D1_target).backward()
 
             scaler.step(optimizer)
             scaler.step(optimizer_D1)
->>>>>>> 4e1abb856b0d451fa9c44714b6da122f5424a5eb
             scaler.update()
 
             tq.update(args.batch_size*2)
@@ -382,16 +246,7 @@ def train_adversarial(args, model, model_D1, optimizer, optimizer_D1, dataloader
         loss_train_mean = np.mean(loss_record)
         # writer.add_scalar('epoch/loss_epoch_train', float(loss_train_mean), epoch)
         print('loss for train : %f' % (loss_train_mean))
-<<<<<<< HEAD
-        """
-        print('iter = {0:8d}/{1:8d}, loss_seg1 = {2:.3f}, loss_seg2 = {3:.3f}, loss_seg3 = {4:.3f}, loss_adv1 = {5:.3f}, loss_adv2 = {6:.3f}, loss_adv3 = {7:.3f}, loss_ loss_D1 = {8:.3f}, loss_D2 = {9:.3f}, loss_D3 = {10:.3f}'.format(
-            epoch, args.num_epochs, loss_seg_value1, loss_seg_value2, loss_seg_value3, loss_adv_target_value1, loss_adv_target_value2, loss_adv_target_value3, loss_D_value1, loss_D_value2, loss_D_value3))
-        """
-        print('iter = {0:8d}/{1:8d}, loss_seg1 = {2:.3f}, loss_adv1 = {5:.3f}, loss_ loss_D1 = {8:.3f}'.format(
-            epoch, args.num_epochs, loss_seg_value1, loss_adv_target_value1, loss_D_value1))
-=======
 
->>>>>>> 4e1abb856b0d451fa9c44714b6da122f5424a5eb
         if epoch % args.checkpoint_step == 0 and epoch != 0:
             import os
             if not os.path.isdir(args.save_model_path):
@@ -425,6 +280,10 @@ def str2bool(v):
 
 def parse_args():
     parse = argparse.ArgumentParser()
+    parse.add_argument("--LB", dest='LB',
+                       type=float, 
+                       default=0.1, 
+                       help="beta for FDA")
     parse.add_argument('--lambda_adv_target1',
                        dest='lambda_adv_target1',
                        type=float,
