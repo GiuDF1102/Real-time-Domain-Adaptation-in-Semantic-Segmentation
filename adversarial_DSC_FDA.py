@@ -11,9 +11,11 @@ import numpy as np
 from tensorboardX import SummaryWriter
 import torch.cuda.amp as amp
 from utils import poly_lr_scheduler
-from utils import reverse_one_hot, compute_global_accuracy, fast_hist, per_class_iu
+from utils import reverse_one_hot, compute_global_accuracy, fast_hist, per_class_iu, FDA_source_to_target
 from tqdm import tqdm
 import matplotlib.pyplot as plt
+from torchvision.transforms import v2
+from PIL import Image
 
 #FOR ADVERSARIAL
 import torch.nn.functional as F
@@ -137,7 +139,7 @@ def parse_args():
     parse.add_argument('--mode',
                        dest='mode',
                        type=str,
-                       default='train',
+                       default='fda',
     )
     parse.add_argument('--augmentation',
                        dest='augmentation',
@@ -250,6 +252,7 @@ def train_adversarial(args, lambda_adv, model, model_D, optimizer, optimizer_dis
     adv_source_label = 0
     adv_target_label = 1
 
+    normalize = v2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
 
     # Training loop
     for epoch in range(args.num_epochs):
@@ -273,6 +276,13 @@ def train_adversarial(args, lambda_adv, model, model_D, optimizer, optimizer_dis
 
         # Training loop
         for ((data_source, label_source), (data_target, _)) in zip(dataloader_source, dataloader_target):
+
+            for ((index_image,image_source), image_target) in zip(enumerate(data_source), data_target):
+                # Do we have to bring back to original GTA size?
+                data_source[index_image] = FDA_source_to_target(image_source, image_target, L=0.01 )
+
+            data_source = normalize(data_source)
+
             # image and label are being moved to the GPU
             data_source = data_source.cuda()
             data_target = data_target.cuda()
@@ -404,7 +414,7 @@ def main():
 
     mode = args.mode
 
-    source_dataset = GTA5(mode='train_full', aug_type=args.augmentation)
+    source_dataset = GTA5(mode, aug_type=args.augmentation)
     target_dataset = CityScapes(mode='train')
     val_dataset = CityScapes(mode='val')
 
