@@ -70,12 +70,17 @@ class GTA5(Dataset):
                 self.lab_transform = lab_transformation[self.aug_type]
 
         # Normalization
-        self.transform = v2.Compose([
-            v2.ToImage(), 
-            v2.ToDtype(float32, scale=True), 
-            v2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
-        ])
-
+        if self.mode != 'fda':
+          self.transform = v2.Compose([
+              v2.ToImage(), 
+              v2.ToDtype(float32, scale=True), 
+              v2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
+          ])
+        else: 
+          self.transform = v2.Compose([
+              v2.ToImage(), 
+              v2.ToDtype(float32, scale=True)
+          ])
 
     def __len__(self):
         return len(self.data)
