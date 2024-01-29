@@ -386,7 +386,7 @@ def train_adversarial(args, lambda_adv, model, model_D, optimizer, optimizer_dis
                 max_miou = miou
                 import os
                 os.makedirs(args.save_model_path, exist_ok=True)
-                torch.save(model.module.state_dict(), os.path.join(args.save_model_path, 'best_discriminator.pth'))
+                torch.save(model.module.state_dict(), os.path.join(args.save_model_path, 'best.pth'))
                 torch.save(model_D.module.state_dict(), os.path.join(args.save_model_path, 'best_discriminator.pth'))
 
             writer.add_scalar('epoch/precision_val', precision, epoch)
@@ -418,8 +418,8 @@ def main():
     if(args.pretrain_path == './STDCNet813M_73.91.tar'):
         model = BiSeNet(backbone=args.backbone, n_classes=n_classes, pretrain_model=args.pretrain_path, use_conv_last=args.use_conv_last)
     else:
-        model_ckpt = args.pretrain_path+'/latest.pth'
-        modeldiscriminator_ckpt = args.pretrain_path+'/latest_D1.pth'
+        model_ckpt = args.pretrain_path+'/best.pth'
+        modeldiscriminator_ckpt = args.pretrain_path+'/latest_discriminator.pth'
         model = BiSeNet(backbone=args.backbone, n_classes=n_classes, use_conv_last=args.use_conv_last)
         model.load_state_dict(torch.load(model_ckpt), strict=True)
         model_discriminator.load_state_dict(torch.load(modeldiscriminator_ckpt), strict=True)

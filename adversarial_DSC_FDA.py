@@ -282,6 +282,7 @@ def train_adversarial(args, lambda_adv, model, model_D, optimizer, optimizer_dis
                 data_source[index_image] = FDA_source_to_target(image_source, image_target, L=0.01 )
 
             data_source = normalize(data_source)
+            data_target = normalize(data_target)
 
             # image and label are being moved to the GPU
             data_source = data_source.cuda()
@@ -414,8 +415,8 @@ def main():
 
     mode = args.mode
 
-    source_dataset = GTA5(mode, aug_type=args.augmentation)
-    target_dataset = CityScapes(mode='train')
+    source_dataset = GTA5(mode="fda", aug_type=args.augmentation)
+    target_dataset = CityScapes(mode='fda')
     val_dataset = CityScapes(mode='val')
 
     # dataloader

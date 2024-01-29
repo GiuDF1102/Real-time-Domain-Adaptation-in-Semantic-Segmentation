@@ -89,7 +89,7 @@ class GTA5(Dataset):
         image = Image.open('data/GTA5/images/' + self.data[index]).convert('RGB')
         label = Image.open('data/GTA5/labels/' + self.labels[index])
 
-        if self.mode == "train":
+        if self.mode == "train" or self.mode == "train_full":
             image = image.resize((1280, 720), Image.BILINEAR)
             label = label.resize((1280, 720), Image.NEAREST)
         elif self.mode == "fda":
