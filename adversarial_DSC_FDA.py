@@ -406,10 +406,10 @@ def train_adversarial(args, lambda_adv, model, model_D, optimizer, optimizer_dis
 
             writer.add_scalar('epoch/precision_val', precision, epoch)
             writer.add_scalar('epoch/miou val', miou, epoch)
-    plt.plot(range(args.num_epochs), miou_list)
-    plt.xlabel("Epoch #")
-    plt.ylabel("mIoU")
-    plt.savefig(os.path.join("/content/drive/MyDrive/figures",args.figure_name))
+    # plt.plot(range(args.num_epochs), miou_list)
+    # plt.xlabel("Epoch #")
+    # plt.ylabel("mIoU")
+    # plt.savefig(os.path.join("/content/drive/MyDrive/figures",args.figure_name))
 
 def main():
     args = parse_args()
