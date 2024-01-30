@@ -25,7 +25,7 @@ class GTA5(Dataset):
         elif self.mode == 'val':
             self.data = open(self.data_path + 'val_gta5.txt', 'r').read().splitlines()
             self.labels = open(self.data_path + 'val_gta5.txt', 'r').read().splitlines()
-        elif self.mode == 'train_full':
+        elif self.mode == 'train_full' or self.mode == 'fda':
             self.data = open(self.data_path + 'full_gta5.txt', 'r').read().splitlines()
             self.labels = open(self.data_path + 'full_gta5.txt', 'r').read().splitlines()
 
@@ -70,12 +70,17 @@ class GTA5(Dataset):
                 self.lab_transform = lab_transformation[self.aug_type]
 
         # Normalization
-        self.transform = v2.Compose([
-            v2.ToImage(), 
-            v2.ToDtype(float32, scale=True), 
-            v2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
-        ])
-
+        if self.mode != 'fda':
+          self.transform = v2.Compose([
+              v2.ToImage(), 
+              v2.ToDtype(float32, scale=True), 
+              v2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
+          ])
+        else: 
+          self.transform = v2.Compose([
+              v2.ToImage(), 
+              v2.ToDtype(float32, scale=True)
+          ])
 
     def __len__(self):
         return len(self.data)
@@ -84,9 +89,12 @@ class GTA5(Dataset):
         image = Image.open('data/GTA5/images/' + self.data[index]).convert('RGB')
         label = Image.open('data/GTA5/labels/' + self.labels[index])
 
-        if self.mode == "train":
+        if self.mode == "train" or self.mode == "train_full":
             image = image.resize((1280, 720), Image.BILINEAR)
             label = label.resize((1280, 720), Image.NEAREST)
+        elif self.mode == "fda":
+            image = image.resize((1024, 512), Image.BILINEAR)
+            label = label.resize((1024, 512), Image.NEAREST)
 
         # Mapping classes and returning label to a tensor object
         label = np.asarray(label, np.float32)
