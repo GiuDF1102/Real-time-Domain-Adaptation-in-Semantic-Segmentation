@@ -220,6 +220,10 @@ def parse_args():
                        type=str,
                        default='crossentropy',
                        help='loss function')
+    parse.add_argument('--FDA_beta',
+                       type=float,
+                       default=0.01,
+                       help='beta value for FDA')
 
 
     return parse.parse_args()
@@ -279,7 +283,7 @@ def train_adversarial(args, lambda_adv, model, model_D, optimizer, optimizer_dis
 
             for ((index_image,image_source), image_target) in zip(enumerate(data_source), data_target):
                 # Do we have to bring back to original GTA size?
-                data_source[index_image] = FDA_source_to_target(image_source, image_target, L=0.01 )
+                data_source[index_image] = FDA_source_to_target(image_source, image_target, L=args.FDA_beta )
 
             data_source = normalize(data_source)
             data_target = normalize(data_target)
@@ -397,7 +401,7 @@ def train_adversarial(args, lambda_adv, model, model_D, optimizer, optimizer_dis
                 max_miou = miou
                 import os
                 os.makedirs(args.save_model_path, exist_ok=True)
-                torch.save(model.module.state_dict(), os.path.join(args.save_model_path, 'best_discriminator.pth'))
+                torch.save(model.module.state_dict(), os.path.join(args.save_model_path, 'best.pth'))
                 torch.save(model_D.module.state_dict(), os.path.join(args.save_model_path, 'best_discriminator.pth'))
 
             writer.add_scalar('epoch/precision_val', precision, epoch)
