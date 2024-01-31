@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- encoding: utf-8 -*-
 from model.model_stages import BiSeNet
-from cityscapes import CityScapes
+from cityscapes import CityScapes, CityScapesSSL
 from gta5 import GTA5
 import torch
 from torch.utils.data import DataLoader
@@ -11,9 +11,11 @@ import numpy as np
 from tensorboardX import SummaryWriter
 import torch.cuda.amp as amp
 from utils import poly_lr_scheduler
-from utils import reverse_one_hot, compute_global_accuracy, fast_hist, per_class_iu
+from utils import reverse_one_hot, compute_global_accuracy, fast_hist, per_class_iu, FDA_source_to_target
 from tqdm import tqdm
 import matplotlib.pyplot as plt
+from torchvision.transforms import v2
+from PIL import Image
 
 #FOR ADVERSARIAL
 import torch.nn.functional as F
@@ -137,7 +139,7 @@ def parse_args():
     parse.add_argument('--mode',
                        dest='mode',
                        type=str,
-                       default='train',
+                       default='fda',
     )
     parse.add_argument('--augmentation',
                        dest='augmentation',
@@ -218,12 +220,16 @@ def parse_args():
                        type=str,
                        default='crossentropy',
                        help='loss function')
+    parse.add_argument('--FDA_beta',
+                       type=float,
+                       default=0.01,
+                       help='beta value for FDA')
 
 
     return parse.parse_args()
 
 
-def train_adversarial(args, lambda_adv, model, model_D, optimizer, optimizer_discriminator, dataloader_target, dataloader_source, dataloader_val):
+def train_adversarial(args, lambda_adv, model, model_D, optimizer, optimizer_discriminator, dataloader_target, dataloader_source, dataloader_val, dataloader_target_ssl):
     """
     This framework is based on a Generative Adversarial Network (GAN). It is composed by:
      - A segmentation model G to predict output results.
@@ -250,6 +256,7 @@ def train_adversarial(args, lambda_adv, model, model_D, optimizer, optimizer_dis
     adv_source_label = 0
     adv_target_label = 1
 
+    normalize = v2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
 
     # Training loop
     for epoch in range(args.num_epochs):
@@ -272,11 +279,22 @@ def train_adversarial(args, lambda_adv, model, model_D, optimizer, optimizer_dis
         loss_record = []
 
         # Training loop
-        for ((data_source, label_source), (data_target, _)) in zip(dataloader_source, dataloader_target):
+        for ((data_source, label_source), (data_ssl, label_ssl), (data_target, _)) in zip(dataloader_source, dataloader_target_ssl, dataloader_target):
+
+            for ((index_image,image_source), image_target) in zip(enumerate(data_source), data_target):
+                # Do we have to bring back to original GTA size?
+                data_source[index_image] = FDA_source_to_target(image_source, image_target, L=args.FDA_beta )
+
+            data_source = normalize(data_source)
+            data_ssl = normalize(data_ssl)
+            data_target = normalize(data_target)
+
             # image and label are being moved to the GPU
             data_source = data_source.cuda()
             data_target = data_target.cuda()
             label_source = label_source.long().cuda()
+            data_ssl= data_ssl.cuda()
+            label_ssl = label_ssl.long().cuda()
 
             # For every mini-batch during the training phase, we set the gradients to zero before starting to do 
             # backpropagation. Otherwise, the gradient would be a combination of the old gradient, which you have 
@@ -307,6 +325,19 @@ def train_adversarial(args, lambda_adv, model, model_D, optimizer, optimizer_dis
                 loss_source = loss1_source + loss2_source + loss3_source
 
             scaler.scale(loss_source).backward()
+
+            with amp.autocast():
+                # Get model outputs, "we use the Stage 3, 4, 5 to produce the feature maps with
+                # down-sample ratio 1/8, 1/16, 1/32"
+                output_target_ssl, out16_target_ssl, out32_target_ssl = model(data_ssl)
+                # Apply loss
+                loss1_target_ssl = loss_func(output_target_ssl, label_ssl.squeeze(1))
+                loss2_target_ssl = loss_func(out16_target_ssl, label_ssl.squeeze(1))
+                loss3_target_ssl = loss_func(out32_target_ssl, label_ssl.squeeze(1))
+                # Combine loss
+                loss_target_ssl = loss1_target_ssl + loss2_target_ssl + loss3_target_ssl
+
+            scaler.scale(loss_target_ssl).backward()
 
             """
                 Then we predict the segmentation softmax output Pt for the target image It (without annotations).
@@ -400,11 +431,13 @@ def main():
 
     mode = args.mode
 
-    source_dataset = GTA5(mode='train_full', aug_type=args.augmentation)
-    target_dataset = CityScapes(mode='train')
+    source_dataset = GTA5(mode="fda", aug_type=args.augmentation)
+    target_dataset = CityScapes(mode='fda')
+    target_dataset = CityScapesSSL(mode='fda')
     val_dataset = CityScapes(mode='val')
 
     # dataloader
+    dataloader_target_ssl = DataLoader(source_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers, drop_last=True)
     dataloader_source = DataLoader(source_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers, pin_memory=False, drop_last=True)
     dataloader_target = DataLoader(target_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers, drop_last=False)
     dataloader_val = DataLoader(val_dataset, batch_size=1, shuffle=False, num_workers=args.num_workers, drop_last=False)
@@ -414,7 +447,7 @@ def main():
     if(args.pretrain_path == './STDCNet813M_73.91.tar'):
         model = BiSeNet(backbone=args.backbone, n_classes=n_classes, pretrain_model=args.pretrain_path, use_conv_last=args.use_conv_last)
     else:
-        model_ckpt = args.pretrain_path+'/best.pth'
+        model_ckpt = args.pretrain_path+'/latest.pth'
         modeldiscriminator_ckpt = args.pretrain_path+'/latest_discriminator.pth'
         model = BiSeNet(backbone=args.backbone, n_classes=n_classes, use_conv_last=args.use_conv_last)
         model.load_state_dict(torch.load(model_ckpt), strict=True)
@@ -440,7 +473,7 @@ def main():
     optimizer_discriminator = torch.optim.Adam(model_discriminator.parameters(), lr=args.learning_rate_discriminator, betas=(0.9, 0.99))
 
     #train
-    train_adversarial(args, args.lambda_adv, model, model_discriminator, optimizer, optimizer_discriminator, dataloader_target, dataloader_source, dataloader_val)
+    train_adversarial(args, args.lambda_adv, model, model_discriminator, optimizer, optimizer_discriminator, dataloader_target, dataloader_source, dataloader_val, dataloader_target_ssl)
 
     # final test
     val(args, model, dataloader_val)
