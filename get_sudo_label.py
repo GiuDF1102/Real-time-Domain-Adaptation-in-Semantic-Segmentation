@@ -8,33 +8,20 @@ import argparse
 from cityscapes import CityScapes
 from torch.utils.data import DataLoader
 
+def str2bool(v):
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Unsupported value encountered.')
+
 def parse_args():
     parse = argparse.ArgumentParser()
-    parse.add_argument('--backbone',
-                       dest='backbone',
-                       type=str,
-                       default='STDCNet813',
-    )
-    parse.add_argument('--pretrain_path_1',
-                      dest='pretrain_path',
-                      type=str
-    )
-    parse.add_argument('--pretrain_path_2',
-                      dest='pretrain_path',
-                      type=str
-    )
-    parse.add_argument('--pretrain_path_2',
-                      dest='pretrain_path',
-                      type=str
-    )
     parse.add_argument('--batch_size',
                        type=int,
-                       default=8,
+                       default=1,
                        help='Number of images in each batch')
-    parse.add_argument('--num_workers',
-                       type=int,
-                       default=4,
-                       help='num of workers')
     parse.add_argument('--cuda',
                        type=str,
                        default='0',
@@ -45,32 +32,48 @@ def parse_args():
                        help='whether to user gpu for training')
     parse.add_argument('--save_sudo',
                        type=str,
-                       default='./data/Cityscapes/sudo_label',
+                       default='./data/sudo_labels',
                        help='pseudo labels save path')
-
+    parse.add_argument('--num_classes',
+                       type=int,
+                       default=19,
+                       help='num of object classes (with void)')
+    parse.add_argument('--num_workers',
+                       type=int,
+                       default=4,
+                       help='num of workers')
+    parse.add_argument('--use_conv_last',
+                       dest='use_conv_last',
+                       type=str2bool,
+                       default=False,
+    )
+    parse.add_argument('--backbone',
+                       dest='backbone',
+                       type=str,
+                       default='CatmodelSmall',
+    )
 
     return parse.parse_args()
 
 def main():
 
     args = parse_args()
-    model1 = BiSeNet(backbone=args.backbone, n_classes=19, pretrain_model=args.pretrain_path_1, use_conv_last=False)
-    model1.load_state_dict(torch.load(args.pretrain_path_1), strict=True)
+    model1 = BiSeNet(backbone=args.backbone, n_classes=args.num_classes, use_conv_last=args.use_conv_last)
+    model1.load_state_dict(torch.load('./ADV_v3_DSC_FDA/latest.pth'))
+    model2 = BiSeNet(backbone=args.backbone, n_classes=args.num_classes, use_conv_last=args.use_conv_last)
+    model2.load_state_dict(torch.load('./ADV_v3_DSC_FDA_005/latest.pth'))
+    model3 = BiSeNet(backbone=args.backbone, n_classes=args.num_classes, use_conv_last=args.use_conv_last)
+    model3.load_state_dict(torch.load('./ADV_v3_DSC_FDA_009/latest.pth'))
+
     model1.eval()
     model1.cuda()
-
-    model2 = BiSeNet(backbone=args.backbone, n_classes=19, pretrain_model=args.pretrain_path_2, use_conv_last=False)
-    model2.load_state_dict(torch.load(args.pretrain_path_2), strict=True)
     model2.eval()
     model2.cuda()
-
-    model3 = BiSeNet(backbone=args.backbone, n_classes=19, pretrain_model=args.pretrain_path_3, use_conv_last=False)
-    model3.load_state_dict(torch.load(args.pretrain_path_3), strict=True)
     model3.eval()
     model3.cuda()
 
     target_dataset = CityScapes(mode='ssl')
-    dataloader_target = DataLoader(target_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers, drop_last=False)
+    dataloader_target = DataLoader(target_dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers, drop_last=False)
 
     predicted_label = np.zeros((len(dataloader_target), 512, 1024))
     predicted_prob = np.zeros((len(dataloader_target), 512, 1024))
@@ -84,13 +87,12 @@ def main():
             image = image.cuda()
 
             # forward
-            output1 = model1(image)
-            output2 = model2(image)
-            output3 = model3(image)
-
+            output1, _, _ = model1(image)
             output1 = nn.functional.softmax(output1, dim=1)
+            output2, _, _ = model2(image)
             output2 = nn.functional.softmax(output2, dim=1)
-            output3 = nn.functional.softmax(output3, dim=1)
+            output3, _, _ = model2(image)
+            output3 = nn.functional.softmax(output2, dim=1)
 
             a, b = 0.3333, 0.3333
             output = a*output1 + b*output2 + (1.0-a-b)*output3
@@ -123,9 +125,8 @@ def main():
             label[   (prob<thres[i]) * (label==i)   ] = 255  
         output = np.asarray(label, dtype=np.uint8)
         output = Image.fromarray(output)
-        name = name.split('/')[-1]
-        output.save('%s/%s' % (args.save, name)) 
-    
+        filename = name.split("\\")[-1]
+        output.save('%s/%s' % (args.save_sudo, filename)) 
     
 if __name__ == '__main__':
     main()
