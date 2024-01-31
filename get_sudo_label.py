@@ -3,15 +3,10 @@ import torch.nn as nn
 from torch.autograd import Variable
 import torch
 import numpy as np
-from data import CreateTrgDataSSLLoader
-from model import CreateSSLModel
-import os
-import scipy.io as sio
 from model.model_stages import BiSeNet
 import argparse
 from cityscapes import CityScapes
 from torch.utils.data import DataLoader
-from torchvision.transforms import v2
 
 def parse_args():
     parse = argparse.ArgumentParser()
