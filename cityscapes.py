@@ -57,7 +57,7 @@ class CityScapes(Dataset):
         image = self.transform(image)
         label = np.array(label).astype(np.int32)[np.newaxis, :]
 
-        if self.mode == 'train' or self.mode == 'train_full' or self.mode=='val':
+        if self.mode == 'train' or self.mode == "fda" or self.mode == 'train_full' or self.mode=='val':
             return image, label
         elif self.mode == 'ssl':
             return image, label, self.data[index]
