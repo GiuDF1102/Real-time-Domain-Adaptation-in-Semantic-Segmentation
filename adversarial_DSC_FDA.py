@@ -406,10 +406,6 @@ def train_adversarial(args, lambda_adv, model, model_D, optimizer, optimizer_dis
 
             writer.add_scalar('epoch/precision_val', precision, epoch)
             writer.add_scalar('epoch/miou val', miou, epoch)
-    # plt.plot(range(args.num_epochs), miou_list)
-    # plt.xlabel("Epoch #")
-    # plt.ylabel("mIoU")
-    # plt.savefig(os.path.join("/content/drive/MyDrive/figures",args.figure_name))
 
 def main():
     args = parse_args()
@@ -434,7 +430,7 @@ def main():
         model = BiSeNet(backbone=args.backbone, n_classes=n_classes, pretrain_model=args.pretrain_path, use_conv_last=args.use_conv_last)
     else:
         model_ckpt = args.pretrain_path+'/latest.pth'
-        modeldiscriminator_ckpt = args.pretrain_path+'/latest_D1.pth'
+        modeldiscriminator_ckpt = args.pretrain_path+'/latest_discriminator.pth'
         model = BiSeNet(backbone=args.backbone, n_classes=n_classes, use_conv_last=args.use_conv_last)
         model.load_state_dict(torch.load(model_ckpt), strict=True)
         model_discriminator.load_state_dict(torch.load(modeldiscriminator_ckpt), strict=True)
