@@ -1,5 +1,5 @@
 # Real-time Domain Adaptation in Semantic Segmentation
-by Antonio Ferrigno, Giulia Di Fede, Vittorio Di Giorgio
+Project crafte by Antonio Ferrigno, Giulia Di Fede, Vittorio Di Giorgio for the Advanced Machine Learning course at Politecnico di Torino (2023/2024)
 
 In this work, we tackle the challenging task of real-time domain adaptation in semantic segmentation. We experiment on a novel and efficient architecture, the [Short-Term Dense Concatenate (STDC)](https://openaccess.thecvf.com/content/CVPR2021/papers/Fan_Rethinking_BiSeNet_for_Real-Time_Semantic_Segmentation_CVPR_2021_paper.pdf) network, for semantic segmentation. We combine this with adversarial learning to align the feature distributions of the source and target domains, as specified in [Learning to Adapt Structured Output Space for Semantic Segmentation](https://openaccess.thecvf.com/content_cvpr_2018/papers/Tsai_Learning_to_Adapt_CVPR_2018_paper.pdf).
 
